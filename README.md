@@ -2,21 +2,39 @@
 
 Screenlight is a small CLI utility that simulates a ring light for video calls by drawing a bright white border around your primary screen.
 
-## MVP scope
-- Windows + macOS support
+## Platform Support
+
+| OS | Status | Backend |
+|---|---|---|
+| Windows | Supported | `tkinter` transparent fullscreen overlay |
+| macOS | Supported | Native AppKit overlay via PyObjC |
+| Linux | Not supported in current release | N/A |
+
+## Current Scope
 - Primary monitor only
 - Persistent defaults for border width + brightness
-- Update running overlay by re-running the command
+- Re-run command to update active overlay
+- `--off` to close running overlay
 
 ## Install
 
+### Windows
 ```bash
 python -m pip install -e .
 ```
 
-After install, the `screenlight` command is available in your shell.
+### macOS
+```bash
+python -m pip install -e .
+```
 
-On macOS, Screenlight uses a native AppKit backend via PyObjC.
+`pyobjc` is installed automatically on macOS through package metadata. If needed, you can install manually:
+
+```bash
+python -m pip install "pyobjc>=10.0"
+```
+
+After install, the `screenlight` command is available in your shell.
 
 ## Usage
 
@@ -64,13 +82,17 @@ screenlight -b 9
 screenlight -w small
 ```
 
+## Known Limitations
+- Primary monitor only (multi-monitor support not yet implemented).
+- Linux is not supported in the current release.
+- macOS fullscreen/Spaces behavior may vary by app configuration.
+
 ## Notes
 - `Esc` also closes the overlay window.
-- If platform requirements are missing (for example PyObjC on macOS), Screenlight exits with an informative error.
+- If platform requirements are missing, Screenlight exits with an informative error.
 
 ## Planned next steps
 - Multi-monitor support
-- Improved cross-platform transparency behavior
 - Optional click-through mode for border area
 
 ## License

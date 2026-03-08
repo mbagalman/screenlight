@@ -155,11 +155,13 @@ Status: In Progress
   - Any known caveats added to README.
 
 ### Epic M3: Docs + Release Prep
+Status: Done
 
 #### M3-1 Update README for dual-platform support
 - Type: Documentation
 - Priority: P0
 - Description: Add OS matrix, install instructions per OS, and known limitations.
+- Status: Done
 - Acceptance Criteria:
   - README clearly distinguishes Windows and macOS setup.
   - Command examples remain consistent with current CLI.
@@ -168,6 +170,7 @@ Status: In Progress
 - Type: Release
 - Priority: P1
 - Description: Bump package version and note macOS support in changelog/release notes.
+- Status: Done
 - Acceptance Criteria:
   - Version bump committed.
   - Release notes include macOS scope and known limitations.

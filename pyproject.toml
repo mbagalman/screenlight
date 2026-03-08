@@ -13,10 +13,14 @@ authors = [
   { name = "Michael Bagalman" }
 ]
 keywords = ["screen", "ring light", "video calls", "overlay"]
+dependencies = [
+  "pyobjc>=10.0; platform_system == 'Darwin'"
+]
 classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
+  "Operating System :: MacOS :: MacOS X",
   "Operating System :: Microsoft :: Windows",
   "Topic :: Multimedia :: Video",
 ]

@@ -3,7 +3,7 @@
 Screenlight is a small CLI utility that simulates a ring light for video calls by drawing a bright white border around your primary screen.
 
 ## MVP scope
-- Windows-first implementation
+- Windows + macOS support
 - Primary monitor only
 - Persistent defaults for border width + brightness
 - Update running overlay by re-running the command
@@ -15,6 +15,8 @@ python -m pip install -e .
 ```
 
 After install, the `screenlight` command is available in your shell.
+
+On macOS, Screenlight uses a native AppKit backend via PyObjC.
 
 ## Usage
 
@@ -64,7 +66,7 @@ screenlight -w small
 
 ## Notes
 - `Esc` also closes the overlay window.
-- If transparency is not supported by your platform/window manager, Screenlight exits with an informative error.
+- If platform requirements are missing (for example PyObjC on macOS), Screenlight exits with an informative error.
 
 ## Planned next steps
 - Multi-monitor support

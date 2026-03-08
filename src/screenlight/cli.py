@@ -9,7 +9,7 @@ from typing import Dict
 
 from .config import WIDTH_TO_PIXELS, load_config, save_config
 from .ipc import send_message
-from .service import run_service
+from .service import UnsupportedPlatformError, ensure_platform_supported, run_service
 
 
 def parse_args() -> argparse.Namespace:
@@ -88,7 +88,10 @@ def main() -> None:
         width = args.width or "medium"
         brightness = args.brightness or 7
         _validate_brightness(brightness)
-        run_service(width_name=width, brightness=brightness)
+        try:
+            run_service(width_name=width, brightness=brightness)
+        except UnsupportedPlatformError as exc:
+            raise SystemExit(str(exc)) from exc
         return
 
     _validate_brightness(args.brightness)
@@ -100,6 +103,11 @@ def main() -> None:
             return
         print("No running Screenlight instance found.")
         return
+
+    try:
+        ensure_platform_supported()
+    except UnsupportedPlatformError as exc:
+        raise SystemExit(str(exc)) from exc
 
     config = load_config()
 

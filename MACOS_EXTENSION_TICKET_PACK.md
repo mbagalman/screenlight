@@ -175,6 +175,37 @@ Status: Done
   - Version bump committed.
   - Release notes include macOS scope and known limitations.
 
+### Epic M4: CI + Packaging Automation
+Status: Done
+
+#### M4-1 Add cross-platform CI workflow
+- Type: DevEx
+- Priority: P0
+- Description: Add GitHub Actions workflow that runs compile and unit tests on Windows, macOS, and Linux across supported Python versions.
+- Status: Done
+- Acceptance Criteria:
+  - Workflow runs on push and pull request.
+  - Matrix includes Windows, macOS, and Linux.
+  - Tests and compile checks run successfully in CI.
+
+#### M4-2 Add package build workflow
+- Type: Release
+- Priority: P1
+- Description: Add manual workflow to build sdist and wheel, then upload build artifacts.
+- Status: Done
+- Acceptance Criteria:
+  - Manual workflow is available in GitHub Actions.
+  - Artifacts include both sdist and wheel.
+
+#### M4-3 Add developer check documentation
+- Type: Documentation
+- Priority: P1
+- Description: Add contributor-facing commands and CI summary to help maintainers run the same checks locally.
+- Status: Done
+- Acceptance Criteria:
+  - Development doc includes local compile/test commands.
+  - Doc points to CI and package workflows.
+
 ## 7) Suggested Execution Order
 1. M0-1, M0-2, M0-3
 2. M1-1, M1-2, M1-3, M1-5
@@ -188,3 +219,10 @@ Status: Done
 - Width presets and brightness scale work and persist.
 - Re-run updates active instance; `--off` shuts it down.
 - README documents macOS installation and caveats.
+
+## 9) Current Execution Snapshot (2026-03-08)
+- M0: Completed
+- M1: Completed
+- M2: In Progress (`M2-3` manual conference-app validation pending)
+- M3: Completed
+- M4: Completed

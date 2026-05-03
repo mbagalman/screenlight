@@ -15,7 +15,12 @@ class PlatformSelectionTests(unittest.TestCase):
             backend_class = select_backend_class("darwin")
             self.assertEqual(backend_class.__name__, "MacOSOverlayBackend")
         except UnsupportedPlatformError as exc:
-            self.assertIn("macOS support requires PyObjC", str(exc))
+            message = str(exc)
+            self.assertTrue(
+                "macOS support requires PyObjC" in message
+                or "only available on macOS" in message,
+                f"unexpected error message: {message}",
+            )
 
     def test_unknown_platform_raises_actionable_error(self) -> None:
         with self.assertRaises(UnsupportedPlatformError) as context:

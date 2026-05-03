@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Dict
 
@@ -23,7 +24,7 @@ def _base_config_dir() -> Path:
         if appdata:
             return Path(appdata)
         return Path.home() / "AppData" / "Roaming"
-    if os.name == "posix" and "darwin" in os.sys.platform:
+    if os.name == "posix" and sys.platform == "darwin":
         return Path.home() / "Library" / "Application Support"
     return Path.home() / ".config"
 

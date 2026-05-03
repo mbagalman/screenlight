@@ -51,11 +51,11 @@ class MacOSOverlayBackend(OverlayBackend):
         from Quartz import (
             CGPathAddRect,
             CGPathCreateMutable,
-            CGWindowLevelForKey,
             CGRectGetHeight,
             CGRectGetWidth,
             CGRectInset,
             CGRectMake,
+            CGWindowLevelForKey,
             kCGScreenSaverWindowLevelKey,
         )
         from QuartzCore import CAShapeLayer
@@ -68,8 +68,12 @@ class MacOSOverlayBackend(OverlayBackend):
         self.NSScreen = NSScreen
         self.NSView = NSView
         self.NSWindow = NSWindow
-        self.NSWindowCollectionBehaviorCanJoinAllSpaces = NSWindowCollectionBehaviorCanJoinAllSpaces
-        self.NSWindowCollectionBehaviorFullScreenAuxiliary = NSWindowCollectionBehaviorFullScreenAuxiliary
+        self.NSWindowCollectionBehaviorCanJoinAllSpaces = (
+            NSWindowCollectionBehaviorCanJoinAllSpaces
+        )
+        self.NSWindowCollectionBehaviorFullScreenAuxiliary = (
+            NSWindowCollectionBehaviorFullScreenAuxiliary
+        )
         self.NSWindowStyleMaskBorderless = NSWindowStyleMaskBorderless
 
         self.CGPathAddRect = CGPathAddRect

@@ -34,7 +34,9 @@ def select_backend_class(platform: str | None = None) -> type[OverlayBackend]:
     )
 
 
-def handle_control_message(message: Dict[str, object], backend: OverlayBackend) -> Dict[str, object]:
+def handle_control_message(
+    message: Dict[str, object], backend: OverlayBackend
+) -> Dict[str, object]:
     command = message.get("command")
 
     if command == "ping":
@@ -79,7 +81,11 @@ class OverlayServiceManager:
 
     def _create_backend(self, width_name: str, brightness: int) -> OverlayBackend:
         backend_class = select_backend_class()
-        return backend_class(width_name=width_name, brightness=brightness, on_shutdown=self._signal_stop)
+        return backend_class(
+            width_name=width_name,
+            brightness=brightness,
+            on_shutdown=self._signal_stop,
+        )
 
     def _signal_stop(self) -> None:
         if self._stopped.is_set():

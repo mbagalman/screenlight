@@ -1,12 +1,20 @@
 # Development
 
+## Setup
+
+```bash
+python -m pip install -e .
+python -m pip install ruff
+```
+
 ## Local quality checks
 
 Run these before opening a PR:
 
 ```bash
+ruff check .
 python -m compileall src tests
-PYTHONPATH=src python -m unittest discover -s tests -v
+python -m unittest discover -s tests -v
 ```
 
 ## CI
@@ -17,6 +25,7 @@ GitHub Actions workflow `.github/workflows/ci.yml` runs on push and pull request
 - Ubuntu
 
 Each run performs:
+- ruff lint
 - editable install
 - source/test compilation
 - unit tests

@@ -9,33 +9,14 @@ from .base import OverlayBackend
 FADE_STEPS = 8
 FADE_STEP_SECONDS = 0.02
 
-
-def get_macos_support_error() -> Optional[str]:
-    if sys.platform != "darwin":
-        return "screenlight: macOS backend is only available on macOS."
-
+# PyObjC is imported at module level but guarded so this module stays
+# importable on non-macOS hosts (CI workers, dev machines without PyObjC).
+# Methods on MacOSOverlayBackend assume the imports succeeded; the class
+# constructor enforces that via get_macos_support_error().
+_HAS_PYOBJC = False
+if sys.platform == "darwin":
     try:
-        from AppKit import NSApp  # noqa: F401
-        from PyObjCTools import AppHelper  # noqa: F401
-        from Quartz import CGPathCreateMutable  # noqa: F401
-    except Exception:
-        return (
-            "screenlight: macOS support requires PyObjC. "
-            "Install with `python -m pip install 'pyobjc>=10.0'` and re-run."
-        )
-
-    return None
-
-
-class MacOSOverlayBackend(OverlayBackend):
-    def __init__(self, width_name: str, brightness: int, on_shutdown: Callable[[], None]) -> None:
-        support_error = get_macos_support_error()
-        if support_error:
-            raise RuntimeError(support_error)
-
-        # Imports are intentionally local so non-macOS environments can import this module safely.
         from AppKit import (
-            NSApp,
             NSApplication,
             NSApplicationActivationPolicyAccessory,
             NSBackingStoreBuffered,
@@ -60,33 +41,32 @@ class MacOSOverlayBackend(OverlayBackend):
         )
         from QuartzCore import CAShapeLayer
 
-        self.NSApp = NSApp
-        self.NSApplication = NSApplication
-        self.NSApplicationActivationPolicyAccessory = NSApplicationActivationPolicyAccessory
-        self.NSBackingStoreBuffered = NSBackingStoreBuffered
-        self.NSColor = NSColor
-        self.NSScreen = NSScreen
-        self.NSView = NSView
-        self.NSWindow = NSWindow
-        self.NSWindowCollectionBehaviorCanJoinAllSpaces = (
-            NSWindowCollectionBehaviorCanJoinAllSpaces
-        )
-        self.NSWindowCollectionBehaviorFullScreenAuxiliary = (
-            NSWindowCollectionBehaviorFullScreenAuxiliary
-        )
-        self.NSWindowStyleMaskBorderless = NSWindowStyleMaskBorderless
+        _HAS_PYOBJC = True
+    except ImportError:
+        pass
 
-        self.CGPathAddRect = CGPathAddRect
-        self.CGPathCreateMutable = CGPathCreateMutable
-        self.CGWindowLevelForKey = CGWindowLevelForKey
-        self.CGRectGetHeight = CGRectGetHeight
-        self.CGRectGetWidth = CGRectGetWidth
-        self.CGRectInset = CGRectInset
-        self.CGRectMake = CGRectMake
-        self.kCGScreenSaverWindowLevelKey = kCGScreenSaverWindowLevelKey
-        self.CAShapeLayer = CAShapeLayer
 
-        self.app_helper = AppHelper
+def get_macos_support_error() -> Optional[str]:
+    if sys.platform != "darwin":
+        return "screenlight: macOS backend is only available on macOS."
+    if not _HAS_PYOBJC:
+        return (
+            "screenlight: macOS support requires PyObjC. "
+            "Install with `python -m pip install 'pyobjc>=10.0'` and re-run."
+        )
+    return None
+
+
+class MacOSOverlayBackend(OverlayBackend):
+    def __init__(
+        self,
+        width_name: str,
+        brightness: int,
+        on_shutdown: Callable[[], None],
+    ) -> None:
+        support_error = get_macos_support_error()
+        if support_error:
+            raise RuntimeError(support_error)
 
         self.on_shutdown = on_shutdown
         self.width_name = width_name
@@ -98,36 +78,36 @@ class MacOSOverlayBackend(OverlayBackend):
         self._configure_window()
 
     def _configure_window(self) -> None:
-        app = self.NSApplication.sharedApplication()
-        app.setActivationPolicy_(self.NSApplicationActivationPolicyAccessory)
+        app = NSApplication.sharedApplication()
+        app.setActivationPolicy_(NSApplicationActivationPolicyAccessory)
 
-        screen = self.NSScreen.mainScreen()
+        screen = NSScreen.mainScreen()
         if screen is None:
             raise RuntimeError("screenlight: unable to resolve primary display on macOS.")
 
         frame = screen.frame()
-        window = self.NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(
+        window = NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(
             frame,
-            self.NSWindowStyleMaskBorderless,
-            self.NSBackingStoreBuffered,
+            NSWindowStyleMaskBorderless,
+            NSBackingStoreBuffered,
             False,
         )
 
         window.setReleasedWhenClosed_(False)
         window.setOpaque_(False)
-        window.setBackgroundColor_(self.NSColor.clearColor())
+        window.setBackgroundColor_(NSColor.clearColor())
         window.setHasShadow_(False)
         window.setIgnoresMouseEvents_(False)
-        window.setLevel_(self.CGWindowLevelForKey(self.kCGScreenSaverWindowLevelKey))
+        window.setLevel_(CGWindowLevelForKey(kCGScreenSaverWindowLevelKey))
         window.setCollectionBehavior_(
-            self.NSWindowCollectionBehaviorCanJoinAllSpaces
-            | self.NSWindowCollectionBehaviorFullScreenAuxiliary
+            NSWindowCollectionBehaviorCanJoinAllSpaces
+            | NSWindowCollectionBehaviorFullScreenAuxiliary
         )
 
-        content_view = self.NSView.alloc().initWithFrame_(frame)
+        content_view = NSView.alloc().initWithFrame_(frame)
         content_view.setWantsLayer_(True)
 
-        border_layer = self.CAShapeLayer.layer()
+        border_layer = CAShapeLayer.layer()
         border_layer.setFillRule_("even-odd")
         content_view.layer().addSublayer_(border_layer)
 
@@ -140,18 +120,18 @@ class MacOSOverlayBackend(OverlayBackend):
 
         self._apply_layout()
         self._set_alpha(0.0)
-        self.app_helper.callLater(0.0, self._fade_to, self.target_alpha)
+        AppHelper.callLater(0.0, self._fade_to, self.target_alpha)
 
     def _build_border_path(self):
         bounds = self.content_view.bounds()
         width = WIDTH_TO_PIXELS[self.width_name]
 
-        outer = self.CGRectMake(0.0, 0.0, self.CGRectGetWidth(bounds), self.CGRectGetHeight(bounds))
-        inner = self.CGRectInset(outer, float(width), float(width))
+        outer = CGRectMake(0.0, 0.0, CGRectGetWidth(bounds), CGRectGetHeight(bounds))
+        inner = CGRectInset(outer, float(width), float(width))
 
-        path = self.CGPathCreateMutable()
-        self.CGPathAddRect(path, None, outer)
-        self.CGPathAddRect(path, None, inner)
+        path = CGPathCreateMutable()
+        CGPathAddRect(path, None, outer)
+        CGPathAddRect(path, None, inner)
         return path
 
     def _apply_layout(self) -> None:
@@ -160,7 +140,7 @@ class MacOSOverlayBackend(OverlayBackend):
 
     def _set_alpha(self, alpha: float) -> None:
         self.current_alpha = min(1.0, max(0.0, alpha))
-        color = self.NSColor.whiteColor().colorWithAlphaComponent_(self.current_alpha)
+        color = NSColor.whiteColor().colorWithAlphaComponent_(self.current_alpha)
         self.border_layer.setFillColor_(color.CGColor())
 
     def _fade_to(self, target: float, on_complete: Optional[Callable[[], None]] = None) -> None:
@@ -185,7 +165,7 @@ class MacOSOverlayBackend(OverlayBackend):
                     on_complete()
                 return
 
-            self.app_helper.callLater(FADE_STEP_SECONDS, tick, step_index + 1)
+            AppHelper.callLater(FADE_STEP_SECONDS, tick, step_index + 1)
 
         tick(1)
 
@@ -201,7 +181,7 @@ class MacOSOverlayBackend(OverlayBackend):
     def _finish_shutdown(self) -> None:
         self.window.orderOut_(None)
         self.window.close()
-        self.app_helper.stopEventLoop()
+        AppHelper.stopEventLoop()
 
     def _shutdown_main(self) -> None:
         if self.closing:
@@ -211,12 +191,12 @@ class MacOSOverlayBackend(OverlayBackend):
 
     def run(self) -> None:
         try:
-            self.app_helper.runEventLoop()
+            AppHelper.runEventLoop()
         finally:
             self.on_shutdown()
 
     def update(self, width_name: str, brightness: int) -> None:
-        self.app_helper.callAfter(self._update_main, width_name, brightness)
+        AppHelper.callAfter(self._update_main, width_name, brightness)
 
     def shutdown(self) -> None:
-        self.app_helper.callAfter(self._shutdown_main)
+        AppHelper.callAfter(self._shutdown_main)

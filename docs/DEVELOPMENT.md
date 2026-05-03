@@ -12,10 +12,13 @@ python -m pip install ruff
 Run these before opening a PR:
 
 ```bash
+ruff format --check .
 ruff check .
 python -m compileall src tests
 python -m unittest discover -s tests -v
 ```
+
+To auto-apply formatting fixes: `ruff format .`
 
 ## CI
 
@@ -25,7 +28,7 @@ GitHub Actions workflow `.github/workflows/ci.yml` runs on push and pull request
 - Ubuntu
 
 Each run performs:
-- ruff lint
+- ruff lint and format check
 - editable install
 - source/test compilation
 - unit tests

@@ -17,8 +17,7 @@ class PlatformSelectionTests(unittest.TestCase):
         except UnsupportedPlatformError as exc:
             message = str(exc)
             self.assertTrue(
-                "macOS support requires PyObjC" in message
-                or "only available on macOS" in message,
+                "macOS support requires PyObjC" in message or "only available on macOS" in message,
                 f"unexpected error message: {message}",
             )
 

@@ -29,8 +29,7 @@ def select_backend_class(platform: str | None = None) -> type[OverlayBackend]:
             raise UnsupportedPlatformError(support_error)
         return MacOSOverlayBackend
     raise UnsupportedPlatformError(
-        f"screenlight: unsupported platform '{resolved}'. "
-        "Current release supports Windows only."
+        f"screenlight: unsupported platform '{resolved}'. Current release supports Windows only."
     )
 
 

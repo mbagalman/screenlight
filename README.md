@@ -82,6 +82,12 @@ screenlight -b 9
 screenlight -w small
 ```
 
+## Design Notes
+
+The CLI launches a detached background process that owns the overlay window. Subsequent `screenlight` invocations don't spawn a new process — they send a JSON message over a localhost TCP socket (`127.0.0.1:45871`) to update the running overlay or shut it down.
+
+This is single-user, single-machine by design. It's appropriate for a personal workstation but not hardened for shared/multi-tenant hosts: anything that can connect to localhost can send control messages.
+
 ## Known Limitations
 - Primary monitor only (multi-monitor support not yet implemented).
 - Linux is not supported in the current release.
